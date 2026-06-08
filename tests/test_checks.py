@@ -84,28 +84,28 @@ def test_venv_python_version_no_venv(vault_root, venv_config):
 
 # ── check_deps_importable ──────────────────────────────────────────────────────
 
-def test_deps_importable_all_ok(vault_root, venv_config, fake_venv_python):
+def test_deps_importable_all_ok(vault_root, venv_config, checks_config, fake_venv_python):
     mock = MagicMock()
     mock.returncode = 0
     with patch("subprocess.run", return_value=mock):
-        r = c.check_deps_importable(vault_root, venv_config)
+        r = c.check_deps_importable(vault_root, venv_config, checks_config)
     assert r.ok is True
 
 
-def test_deps_importable_one_missing(vault_root, venv_config, fake_venv_python):
+def test_deps_importable_one_missing(vault_root, venv_config, checks_config, fake_venv_python):
     def side_effect(cmd, **kwargs):
         m = MagicMock()
         m.returncode = 1 if "sentence_transformers" in cmd[-1] else 0
         return m
 
     with patch("subprocess.run", side_effect=side_effect):
-        r = c.check_deps_importable(vault_root, venv_config)
+        r = c.check_deps_importable(vault_root, venv_config, checks_config)
     assert r.ok is False
     assert "sentence_transformers" in r.message
 
 
-def test_deps_importable_no_venv(vault_root, venv_config):
-    r = c.check_deps_importable(vault_root, venv_config)
+def test_deps_importable_no_venv(vault_root, venv_config, checks_config):
+    r = c.check_deps_importable(vault_root, venv_config, checks_config)
     assert r.ok is False
     assert "venv nicht gefunden" in r.message
 

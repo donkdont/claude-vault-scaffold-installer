@@ -54,11 +54,13 @@ def check_venv_python_version(vault_root: Path, venv_config: VenvConfig) -> Chec
         return CheckResult(ok=False, message=str(exc))
 
 
-def check_deps_importable(vault_root: Path, venv_config: VenvConfig) -> CheckResult:
+def check_deps_importable(
+    vault_root: Path, venv_config: VenvConfig, checks: ChecksConfig
+) -> CheckResult:
     python = vault_root / venv_config.path / "bin" / "python"
     if not python.exists():
         return CheckResult(ok=False, message="venv nicht gefunden")
-    deps = ["sentence_transformers", "mcp", "numpy", "yaml"]
+    deps = checks.check_imports or ["sentence_transformers", "mcp", "numpy", "yaml"]
     failed = []
     for dep in deps:
         try:

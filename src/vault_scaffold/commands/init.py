@@ -8,6 +8,7 @@ from rich.panel import Panel
 from ..core import config_patcher, environment, venv_manager
 from ..core import manifest as manifest_mod
 from ..core.path_resolver import resolve_vault_root
+from ..core.version_tracker import write_installed_version
 from . import doctor as doctor_mod
 
 console = Console()
@@ -24,11 +25,17 @@ _GUI_STEPS = [
 
 
 def run(path: str) -> None:
+    from importlib.metadata import version as pkg_version, PackageNotFoundError
     vault_root = _resolve(path)
     uv = _check_uv()
     manifest = manifest_mod.load()
     _ensure_venv(vault_root, manifest, uv)
     _patch_files(vault_root, manifest)
+    try:
+        installed_version = pkg_version("vault-scaffold")
+    except PackageNotFoundError:
+        installed_version = manifest.version
+    write_installed_version(vault_root, installed_version)
     _print_gui_steps(vault_root, manifest)
     console.print("\n[dim]Führe doctor aus…[/dim]")
     all_ok = doctor_mod.run(vault_root, manifest)

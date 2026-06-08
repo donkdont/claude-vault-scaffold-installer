@@ -34,6 +34,7 @@ class ChecksConfig:
     model_key: str
     hook_scripts: list[str]
     no_hardcoded_paths: list[str]
+    check_imports: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -81,5 +82,6 @@ def load() -> Manifest:
             model_key=checks_raw["model_key"],
             hook_scripts=checks_raw["hook_scripts"],
             no_hardcoded_paths=checks_raw.get("no_hardcoded_paths", []),
+            check_imports=checks_raw.get("check_imports", []),
         ),
     )

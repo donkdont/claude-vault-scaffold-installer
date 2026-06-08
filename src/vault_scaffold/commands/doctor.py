@@ -30,7 +30,7 @@ def run(vault_root: Path, manifest: manifest_mod.Manifest | None = None) -> bool
         checks_mod.check_python_conflict(),
         checks_mod.check_venv_exists(vault_root, manifest.venv),
         checks_mod.check_venv_python_version(vault_root, manifest.venv),
-        checks_mod.check_deps_importable(vault_root, manifest.venv),
+        checks_mod.check_deps_importable(vault_root, manifest.venv, manifest.checks),
         checks_mod.check_mcp_command(vault_root, manifest.checks),
         checks_mod.check_no_placeholder(vault_root, manifest.checks),
         checks_mod.check_hook_scripts(vault_root, manifest.checks),

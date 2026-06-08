@@ -27,6 +27,7 @@ def checks_config():
         model_key="sentence-transformers/all-MiniLM-L6-v2",
         hook_scripts=[".claude/scripts/hook_a.sh", ".claude/scripts/hook_b.py"],
         no_hardcoded_paths=[".claude/agents/vault-describer.md"],
+        check_imports=["sentence_transformers", "mcp", "numpy", "yaml"],
     )
 
 

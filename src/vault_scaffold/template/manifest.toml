@@ -50,3 +50,5 @@ hook_scripts = [
 no_hardcoded_paths = [
     ".claude/agents/vault-describer.md",
 ]
+# Python import names for the required deps (differ from pip package names)
+check_imports = ["sentence_transformers", "mcp", "numpy", "yaml"]
