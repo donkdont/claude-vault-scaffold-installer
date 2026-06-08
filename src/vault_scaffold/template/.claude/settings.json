@@ -1,0 +1,70 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash './.claude/scripts/check-pending-descriptions.sh'",
+            "timeout": 10,
+            "statusMessage": "Vault-Queue prüfen..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 './.claude/scripts/enforce-index-first.py'",
+            "timeout": 5,
+            "statusMessage": "INDEX-First-Check..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 './.claude/scripts/enforce-sdd-tdd.py'",
+            "timeout": 10,
+            "statusMessage": "SDD/TDD-Check..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'v=$(git rev-parse --show-toplevel 2>/dev/null) && python3 \"$v/.claude/scripts/suggest-semantic-search.py\" 2>/dev/null; exit 0'",
+            "timeout": 5,
+            "statusMessage": "Semantiksuche-Check..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 './.claude/scripts/vault-lint-hook.py'",
+            "timeout": 20,
+            "statusMessage": "Vault-Lint..."
+          },
+          {
+            "type": "command",
+            "command": "python3 './.claude/scripts/queue-description.py'",
+            "timeout": 10,
+            "statusMessage": "Vault-Index-Queue..."
+          }
+        ]
+      }
+    ]
+  }
+}

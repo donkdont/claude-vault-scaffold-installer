@@ -9,7 +9,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from ..core import config_patcher, environment, venv_manager
+from ..core import config_patcher, environment, template_installer, venv_manager
 from ..core import manifest as manifest_mod
 from ..core.path_resolver import resolve_vault_root
 from ..core.version_tracker import read_installed_version, write_installed_version
@@ -49,6 +49,7 @@ def run(path: str) -> None:
     manifest = manifest_mod.load()
     _ensure_venv(vault_root, manifest, uv)
     _patch_files(vault_root, manifest)
+    _install_templates(vault_root, manifest)
     write_installed_version(vault_root, available)
     console.print(f"[green]✓[/green] Version-Datei aktualisiert: {installed} → {available}")
 
@@ -58,6 +59,19 @@ def run(path: str) -> None:
         console.print("\n[yellow]Update abgeschlossen, aber einige Checks sind noch offen.[/yellow]")
         raise typer.Exit(1)
     console.print(f"\n[bold green]vault-scaffold update complete ({installed} → {available}).[/bold green]")
+
+
+def _install_templates(vault_root: Path, manifest: manifest_mod.Manifest) -> None:
+    with console.status("Neue Scaffold-Dateien prüfen…"):
+        results = template_installer.install_templates(vault_root, manifest)
+
+    installed = [p for p, a in results if a == template_installer.INSTALLED]
+
+    if not installed:
+        console.print("[green]✓[/green] Scaffold-Dateien vollständig — nichts zu tun")
+    else:
+        for p in installed:
+            console.print(f"[green]✓[/green] Neu installiert: {p.relative_to(vault_root)}")
 
 
 def _check_uv() -> Path:

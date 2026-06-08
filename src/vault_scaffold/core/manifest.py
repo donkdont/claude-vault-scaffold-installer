@@ -21,6 +21,11 @@ class VenvConfig:
 
 
 @dataclass(frozen=True)
+class TemplateSpec:
+    file: str
+
+
+@dataclass(frozen=True)
 class PatchSpec:
     file: str
     placeholder: str
@@ -43,6 +48,7 @@ class Manifest:
     description: str
     venv: VenvConfig
     patches: list[PatchSpec]
+    templates: list[TemplateSpec]
     checks: ChecksConfig
 
     @property
@@ -74,6 +80,10 @@ def load() -> Manifest:
         patches=[
             PatchSpec(file=p["file"], placeholder=p["placeholder"])
             for p in raw.get("patches", [])
+        ],
+        templates=[
+            TemplateSpec(file=t["file"])
+            for t in raw.get("templates", [])
         ],
         checks=ChecksConfig(
             mcp_command=checks_raw["mcp_command"],

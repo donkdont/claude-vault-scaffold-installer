@@ -1,0 +1,11 @@
+max_depth: 6
+
+indexed_folders:
+  - "00 Inbox"
+  - "01 Systeme"
+  - "02 Projekte"
+  - "03 Wissen"
+  - "04 Referenz"
+  - "05 Archiv"
+  - "06 Forschung"
+  - "07 Unternehmen"

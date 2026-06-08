@@ -18,6 +18,42 @@ deps = [
 # Passed as --extra-index-url to uv pip install.
 extra_index_urls = ["https://download.pytorch.org/whl/cpu"]
 
+# ── plain-copy templates ──────────────────────────────────────────────────────
+# Files installed as-is (no placeholder replacement).
+# init/update copies them if they don't exist in the vault yet.
+[[templates]]
+file = ".mcp.json"
+
+[[templates]]
+file = ".claude/settings.json"
+
+[[templates]]
+file = ".claude/index-config.yaml"
+
+[[templates]]
+file = ".claude/scripts/sc_mcp_server.py"
+
+[[templates]]
+file = ".claude/scripts/check-pending-descriptions.sh"
+
+[[templates]]
+file = ".claude/scripts/enforce-index-first.py"
+
+[[templates]]
+file = ".claude/scripts/enforce-sdd-tdd.py"
+
+[[templates]]
+file = ".claude/scripts/queue-description.py"
+
+[[templates]]
+file = ".claude/scripts/suggest-semantic-search.py"
+
+[[templates]]
+file = ".claude/scripts/update-vault-index.py"
+
+[[templates]]
+file = ".claude/scripts/vault-lint-hook.py"
+
 # ── patches ───────────────────────────────────────────────────────────────────
 # Files in the template/ tree that contain {{VAULT_ROOT}}.
 # init replaces every occurrence with the vault's resolved absolute path.

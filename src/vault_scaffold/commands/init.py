@@ -5,7 +5,7 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from ..core import config_patcher, environment, venv_manager
+from ..core import config_patcher, environment, template_installer, venv_manager
 from ..core import manifest as manifest_mod
 from ..core.path_resolver import resolve_vault_root
 from ..core.version_tracker import write_installed_version
@@ -31,6 +31,7 @@ def run(path: str) -> None:
     manifest = manifest_mod.load()
     _ensure_venv(vault_root, manifest, uv)
     _patch_files(vault_root, manifest)
+    _install_templates(vault_root, manifest)
     try:
         installed_version = pkg_version("vault-scaffold")
     except PackageNotFoundError:
@@ -107,6 +108,23 @@ def _patch_files(vault_root: Path, manifest: manifest_mod.Manifest) -> None:
     else:
         for p in patched:
             console.print(f"[green]✓[/green] Gepatcht: {p.relative_to(vault_root)}")
+
+
+def _install_templates(vault_root: Path, manifest: manifest_mod.Manifest) -> None:
+    with console.status("Scaffold-Dateien installieren…"):
+        results = template_installer.install_templates(vault_root, manifest)
+
+    installed = [p for p, a in results if a == template_installer.INSTALLED]
+    skipped_count = sum(1 for _, a in results if a == template_installer.SKIPPED)
+
+    if not installed:
+        console.print(
+            f"[green]✓[/green] Scaffold-Dateien bereits vorhanden "
+            f"({skipped_count} übersprungen)"
+        )
+    else:
+        for p in installed:
+            console.print(f"[green]✓[/green] Installiert: {p.relative_to(vault_root)}")
 
 
 def _print_gui_steps(vault_root: Path, manifest: manifest_mod.Manifest) -> None:

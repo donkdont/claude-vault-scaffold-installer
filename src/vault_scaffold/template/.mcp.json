@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "smart-connections": {
+      "command": ".smart-env-tools/.venv/bin/python",
+      "args": [".claude/scripts/sc_mcp_server.py"],
+      "env": {
+        "HF_HUB_OFFLINE": "1"
+      }
+    }
+  }
+}
