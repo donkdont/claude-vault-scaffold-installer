@@ -30,12 +30,15 @@ def run(path: str) -> None:
     _ensure_venv(vault_root, manifest, uv)
     _patch_files(vault_root, manifest)
     _print_gui_steps(vault_root, manifest)
-    console.print("\n[bold green]vault-scaffold init complete.[/bold green]\n")
-    console.print("[dim]Führe doctor aus…[/dim]")
+    console.print("\n[dim]Führe doctor aus…[/dim]")
     all_ok = doctor_mod.run(vault_root, manifest)
     if not all_ok:
-        console.print("\n[yellow]Einige Checks fehlgeschlagen — bitte oben beheben.[/yellow]")
+        console.print(
+            "\n[yellow]Setup abgeschlossen, aber einige Checks sind noch offen "
+            "(meist die manuellen Obsidian-GUI-Schritte oben) — bitte beheben.[/yellow]"
+        )
         raise typer.Exit(1)
+    console.print("\n[bold green]vault-scaffold init complete.[/bold green]")
 
 
 # ── steps ─────────────────────────────────────────────────────────────────────

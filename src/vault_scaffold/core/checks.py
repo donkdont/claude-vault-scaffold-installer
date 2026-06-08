@@ -1,8 +1,6 @@
 """Individual health-check functions for vault-scaffold doctor."""
 from __future__ import annotations
 
-import json
-import os
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -87,6 +85,17 @@ def check_mcp_command(vault_root: Path, checks: ChecksConfig) -> CheckResult:
     command_path = vault_root / checks.mcp_command
     if not command_path.exists():
         return CheckResult(ok=False, message=f"mcp_command-Pfad fehlt: {command_path}")
+    # The MCP config must actually point at mcp_command, otherwise the server
+    # would launch with a different (wrong) interpreter and the check is moot.
+    try:
+        config_text = mcp_config_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return CheckResult(ok=False, message=f"{checks.mcp_config} nicht lesbar: {exc}")
+    if checks.mcp_command not in config_text:
+        return CheckResult(
+            ok=False,
+            message=f"{checks.mcp_config} referenziert {checks.mcp_command} nicht",
+        )
     return CheckResult(ok=True, message=str(command_path))
 
 
@@ -105,19 +114,11 @@ def check_no_placeholder(vault_root: Path, checks: ChecksConfig) -> CheckResult:
 
 
 def check_hook_scripts(vault_root: Path, checks: ChecksConfig) -> CheckResult:
-    missing = []
-    not_executable = []
-    for rel in checks.hook_scripts:
-        p = vault_root / rel
-        if not p.exists():
-            missing.append(rel)
-        elif not os.access(p, os.X_OK):
-            not_executable.append(rel)
-    parts = []
+    # Claude Code invokes hooks via interpreter (`python3 './…'` / `bash './…'`,
+    # see settings.json), never as a bare `./script`. The executable bit is
+    # therefore irrelevant for .py/.sh hooks — checking it would flag healthy
+    # vaults as broken. We only verify the scripts exist.
+    missing = [rel for rel in checks.hook_scripts if not (vault_root / rel).exists()]
     if missing:
-        parts.append(f"Fehlend: {', '.join(missing)}")
-    if not_executable:
-        parts.append(f"Nicht ausführbar: {', '.join(not_executable)}")
-    if parts:
-        return CheckResult(ok=False, message="; ".join(parts))
-    return CheckResult(ok=True, message=f"{len(checks.hook_scripts)} Scripts vorhanden und ausführbar")
+        return CheckResult(ok=False, message=f"Fehlend: {', '.join(missing)}")
+    return CheckResult(ok=True, message=f"{len(checks.hook_scripts)} Scripts vorhanden")
