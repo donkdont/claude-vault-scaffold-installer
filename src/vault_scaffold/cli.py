@@ -1,5 +1,7 @@
 import typer
 
+from .commands import init as init_cmd
+
 app = typer.Typer(
     name="vault-scaffold",
     help="CLI installer for claude-vault-scaffold.",
@@ -12,7 +14,7 @@ def init(
     path: str = typer.Argument(".", help="Target vault directory (default: current directory)"),
 ) -> None:
     """Idempotently set up a new or existing vault with claude-vault-scaffold."""
-    typer.echo("vault-scaffold init — not yet implemented")
+    init_cmd.run(path)
 
 
 @app.command()

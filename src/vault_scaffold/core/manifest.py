@@ -17,6 +17,7 @@ class VenvConfig:
     path: str
     python_version: str
     deps: list[str]
+    extra_index_urls: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -67,6 +68,7 @@ def load() -> Manifest:
             path=venv_raw["path"],
             python_version=venv_raw["python_version"],
             deps=venv_raw["deps"],
+            extra_index_urls=venv_raw.get("extra_index_urls", []),
         ),
         patches=[
             PatchSpec(file=p["file"], placeholder=p["placeholder"])

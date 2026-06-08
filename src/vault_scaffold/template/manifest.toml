@@ -14,6 +14,9 @@ deps = [
     "numpy>=1.26",
     "pyyaml>=6.0",
 ]
+# CPU-only torch — prevents downloading 1 GB+ of CUDA packages on most machines.
+# Passed as --extra-index-url to uv pip install.
+extra_index_urls = ["https://download.pytorch.org/whl/cpu"]
 
 # ── patches ───────────────────────────────────────────────────────────────────
 # Files in the template/ tree that contain {{VAULT_ROOT}}.
