@@ -8,6 +8,7 @@ from rich.panel import Panel
 from ..core import config_patcher, environment, venv_manager
 from ..core import manifest as manifest_mod
 from ..core.path_resolver import resolve_vault_root
+from . import doctor as doctor_mod
 
 console = Console()
 
@@ -29,7 +30,12 @@ def run(path: str) -> None:
     _ensure_venv(vault_root, manifest, uv)
     _patch_files(vault_root, manifest)
     _print_gui_steps(vault_root, manifest)
-    console.print("\n[bold green]vault-scaffold init complete.[/bold green]")
+    console.print("\n[bold green]vault-scaffold init complete.[/bold green]\n")
+    console.print("[dim]Führe doctor aus…[/dim]")
+    all_ok = doctor_mod.run(vault_root, manifest)
+    if not all_ok:
+        console.print("\n[yellow]Einige Checks fehlgeschlagen — bitte oben beheben.[/yellow]")
+        raise typer.Exit(1)
 
 
 # ── steps ─────────────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import typer
 
+from .commands import doctor as doctor_cmd
 from .commands import init as init_cmd
 
 app = typer.Typer(
@@ -18,6 +19,8 @@ def init(
 
 
 @app.command()
-def doctor() -> None:
+def doctor(
+    path: str = typer.Argument(".", help="Target vault directory (default: current directory)"),
+) -> None:
     """Diagnose the current vault setup and report health checks."""
-    typer.echo("vault-scaffold doctor — not yet implemented")
+    doctor_cmd.run_from_cli(path)
