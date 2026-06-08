@@ -1,0 +1,49 @@
+[scaffold]
+version = "1.0.0"
+description = "claude-vault-scaffold — Obsidian + Claude Code vault integration"
+
+# ── venv ──────────────────────────────────────────────────────────────────────
+# init creates the venv at {vault_root}/{path} using the pinned python_version.
+# python_version must be installable via `uv python install`.
+[venv]
+path = ".smart-env-tools/.venv"
+python_version = "3.12"
+deps = [
+    "sentence-transformers>=2.7",
+    "mcp>=1.0",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+]
+
+# ── patches ───────────────────────────────────────────────────────────────────
+# Files in the template/ tree that contain {{VAULT_ROOT}}.
+# init replaces every occurrence with the vault's resolved absolute path.
+# All paths are relative to the vault root.
+[[patches]]
+file = ".claude/agents/vault-describer.md"
+placeholder = "{{VAULT_ROOT}}"
+
+# ── doctor checks ─────────────────────────────────────────────────────────────
+[checks]
+# Relative path to the venv Python binary (from vault root)
+mcp_command = ".smart-env-tools/.venv/bin/python"
+# MCP config that must reference mcp_command
+mcp_config = ".mcp.json"
+# Expected embedding dimension from sentence-transformers model
+embedding_dim = 384
+# Model key used in sc_mcp_server.py — must be consistent
+model_key = "sentence-transformers/all-MiniLM-L6-v2"
+# Hook scripts that must exist and be executable
+hook_scripts = [
+    ".claude/scripts/check-pending-descriptions.sh",
+    ".claude/scripts/enforce-index-first.py",
+    ".claude/scripts/enforce-sdd-tdd.py",
+    ".claude/scripts/queue-description.py",
+    ".claude/scripts/suggest-semantic-search.py",
+    ".claude/scripts/update-vault-index.py",
+    ".claude/scripts/vault-lint-hook.py",
+]
+# No hardcoded paths (machine-specific strings) allowed in these files
+no_hardcoded_paths = [
+    ".claude/agents/vault-describer.md",
+]
