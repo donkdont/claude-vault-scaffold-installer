@@ -163,3 +163,43 @@ class TestInstallTemplates:
             if not (manifest.template_dir / spec.file).exists()
         ]
         assert missing == [], f"Template source files missing: {missing}"
+
+    def test_force_overwrites_existing_file(self, tmp_path):
+        """With force=True, an existing vault file is overwritten from the template."""
+        template_dir = tmp_path / "tmpl"
+        vault_root = tmp_path / "vault"
+        vault_root.mkdir()
+
+        src = template_dir / ".mcp.json"
+        src.parent.mkdir(parents=True)
+        src.write_text('{"template": true}')
+
+        existing = vault_root / ".mcp.json"
+        existing.write_text('{"user": "customised"}')
+
+        manifest = _make_manifest_with_templates(template_dir, [".mcp.json"])
+        results = template_installer.install_templates(vault_root, manifest, force=True)
+
+        assert len(results) == 1
+        dest, action = results[0]
+        assert action == template_installer.OVERWRITTEN
+        assert dest.read_text() == '{"template": true}'
+
+    def test_force_false_preserves_existing_file(self, tmp_path):
+        """With force=False (default), an existing vault file is not overwritten."""
+        template_dir = tmp_path / "tmpl"
+        vault_root = tmp_path / "vault"
+        vault_root.mkdir()
+
+        src = template_dir / ".mcp.json"
+        src.parent.mkdir(parents=True)
+        src.write_text('{"template": true}')
+
+        existing = vault_root / ".mcp.json"
+        existing.write_text('{"user": "customised"}')
+
+        manifest = _make_manifest_with_templates(template_dir, [".mcp.json"])
+        results = template_installer.install_templates(vault_root, manifest, force=False)
+
+        assert results[0][1] == template_installer.SKIPPED
+        assert existing.read_text() == '{"user": "customised"}'

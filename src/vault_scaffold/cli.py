@@ -39,6 +39,7 @@ def status(
 @app.command()
 def update(
     path: str = typer.Argument(".", help="Target vault directory (default: current directory)"),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing template files with the bundled versions."),
 ) -> None:
     """Update an existing vault to the current scaffold version."""
-    update_cmd.run(path)
+    update_cmd.run(path, force=force)

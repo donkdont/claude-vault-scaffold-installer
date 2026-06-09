@@ -54,6 +54,12 @@ file = ".claude/scripts/update-vault-index.py"
 [[templates]]
 file = ".claude/scripts/vault-lint-hook.py"
 
+[[templates]]
+file = "CLAUDE.md"
+
+[[templates]]
+file = ".obsidian/community-plugins.json"
+
 # ── patches ───────────────────────────────────────────────────────────────────
 # Files in the template/ tree that contain {{VAULT_ROOT}}.
 # init replaces every occurrence with the vault's resolved absolute path.

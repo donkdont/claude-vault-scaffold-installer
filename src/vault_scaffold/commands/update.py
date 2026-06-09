@@ -18,7 +18,7 @@ from . import doctor as doctor_mod
 console = Console()
 
 
-def run(path: str) -> None:
+def run(path: str, force: bool = False) -> None:
     try:
         vault_root = resolve_vault_root(path)
     except ValueError as exc:
@@ -39,17 +39,20 @@ def run(path: str) -> None:
         console.print("Führe zuerst aus: vault-scaffold init")
         raise typer.Exit(1)
 
-    if installed == available:
+    if installed == available and not force:
         console.print(f"[green]✓ Bereits aktuell ({available})[/green] — nichts zu tun.")
         return
 
-    console.print(f"Update: [bold]{installed}[/bold] → [bold]{available}[/bold]\n")
+    if installed != available:
+        console.print(f"Update: [bold]{installed}[/bold] → [bold]{available}[/bold]\n")
+    else:
+        console.print(f"[dim]Force-Reinstall: {available}[/dim]\n")
 
     uv = _check_uv()
     manifest = manifest_mod.load()
     _ensure_venv(vault_root, manifest, uv)
     _patch_files(vault_root, manifest)
-    _install_templates(vault_root, manifest)
+    _install_templates(vault_root, manifest, force=force)
     write_installed_version(vault_root, available)
     console.print(f"[green]✓[/green] Version-Datei aktualisiert: {installed} → {available}")
 
@@ -61,17 +64,20 @@ def run(path: str) -> None:
     console.print(f"\n[bold green]vault-scaffold update complete ({installed} → {available}).[/bold green]")
 
 
-def _install_templates(vault_root: Path, manifest: manifest_mod.Manifest) -> None:
+def _install_templates(vault_root: Path, manifest: manifest_mod.Manifest, *, force: bool = False) -> None:
     with console.status("Neue Scaffold-Dateien prüfen…"):
-        results = template_installer.install_templates(vault_root, manifest)
+        results = template_installer.install_templates(vault_root, manifest, force=force)
 
     installed = [p for p, a in results if a == template_installer.INSTALLED]
+    overwritten = [p for p, a in results if a == template_installer.OVERWRITTEN]
 
-    if not installed:
+    if not installed and not overwritten:
         console.print("[green]✓[/green] Scaffold-Dateien vollständig — nichts zu tun")
     else:
         for p in installed:
             console.print(f"[green]✓[/green] Neu installiert: {p.relative_to(vault_root)}")
+        for p in overwritten:
+            console.print(f"[yellow]↺[/yellow] Überschrieben: {p.relative_to(vault_root)}")
 
 
 def _check_uv() -> Path:

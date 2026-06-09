@@ -9,17 +9,21 @@ from .manifest import Manifest
 # Sentinel strings used to identify action in results
 INSTALLED = "installed"
 SKIPPED = "skipped"
+OVERWRITTEN = "overwritten"
 
 
 def install_templates(
-    vault_root: Path, manifest: Manifest
+    vault_root: Path, manifest: Manifest, *, force: bool = False
 ) -> list[tuple[Path, str]]:
-    """Copy template files to vault if they don't exist yet.
+    """Copy template files to vault.
 
-    Idempotent: files that already exist are skipped without modification
-    (preserves any user customisations).
+    By default idempotent: files that already exist are skipped without
+    modification (preserves user customisations).
 
-    Returns list of (absolute_path, action) where action is INSTALLED or SKIPPED.
+    With force=True: existing files are overwritten from the template.
+
+    Returns list of (absolute_path, action) where action is INSTALLED,
+    SKIPPED, or OVERWRITTEN.
     """
     results: list[tuple[Path, str]] = []
     template_dir = manifest.template_dir
@@ -32,7 +36,11 @@ def install_templates(
             continue
 
         if dest.exists():
-            results.append((dest, SKIPPED))
+            if force:
+                shutil.copy2(src, dest)
+                results.append((dest, OVERWRITTEN))
+            else:
+                results.append((dest, SKIPPED))
         else:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dest)
